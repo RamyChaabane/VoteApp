@@ -1,0 +1,21 @@
+<template>
+  <div id="app">
+    <h1>Vote!</h1>
+    <button @click="vote('Cats')">Vote for Cats</button>
+    <button @click="vote('Dogs')">Vote for Dogs</button>
+    <p v-if="message">{{ message }}</p>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+
+const message = ref('')
+const vote = async (option) => {
+  const res = await fetch('http://localhost:8080/vote', {
+    method: 'POST',
+    body: new URLSearchParams({ vote: option }),
+  })
+  message.value = await res.text()
+}
+</script>

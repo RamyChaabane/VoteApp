@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/RamyChaabane/VoteApp/internal/handler"
-	"github.com/RamyChaabane/VoteApp/internal/infrastructure/redis"
-	usecase "github.com/RamyChaabane/VoteApp/internal/usecase/vote"
+	"github.com/RamyChaabane/VoteApp/backend/internal/handler"
+	"github.com/RamyChaabane/VoteApp/backend/internal/infrastructure/redis"
+	usecase "github.com/RamyChaabane/VoteApp/backend/internal/usecase/vote"
 )
 
 func main() {

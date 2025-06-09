@@ -2,14 +2,14 @@ package handler
 
 import (
 	"fmt"
+	"github.com/RamyChaabane/VoteApp/backend/internal/infrastructure"
 	"net/http"
 
-	"github.com/VoteApp/backend/internal/infrastructure"
-	usecase "github.com/VoteApp/backend/internal/usecase/vote"
+	usecase "github.com/RamyChaabane/VoteApp/backend/internal/usecase/vote"
 )
 
 var voteUseCase = usecase.UseCase{
-	Repo: redis.NewVoteRepo(),
+	Repo: infrastructure.NewVoteRepo(),
 }
 
 func VoteHandler(w http.ResponseWriter, r *http.Request) {

@@ -10,3 +10,7 @@ const (
 type Vote struct {
 	Option Option
 }
+
+func IsValidOption(vote Vote) bool {
+	return vote.Option == Cats || vote.Option == Dogs
+}

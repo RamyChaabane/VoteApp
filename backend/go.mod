@@ -1,4 +1,4 @@
-module github.com/RamyChaabane/VoteApp
+module github.com/RamyChaabane/VoteApp/backend
 
 go 1.24.2
 

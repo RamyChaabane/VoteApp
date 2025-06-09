@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/RamyChaabane/VoteApp/internal/domain/vote"
-	usecase "github.com/RamyChaabane/VoteApp/internal/usecase/vote"
+	"github.com/RamyChaabane/VoteApp/backend/internal/domain/vote"
+	usecase "github.com/RamyChaabane/VoteApp/backend/internal/usecase/vote"
 )
 
 type VoteHandler struct {

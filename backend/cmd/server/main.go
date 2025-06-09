@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/VoteApp/backend/internal/handler"
+	"github.com/RamyChaabane/VoteApp/backend/internal/handler"
 )
 
 func main() {

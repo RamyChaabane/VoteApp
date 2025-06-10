@@ -1,9 +1,10 @@
 FROM golang:1.24 as builder
 WORKDIR /app
 COPY . .
-RUN go mod tidy && go build -o server ./cmd/server
+RUN go mod tidy && CGO_ENABLED=0 GOOS=linux go build -o vote ./cmd/server
 
 FROM alpine
-COPY --from=builder /app/server /server
+WORKDIR /
+COPY --from=builder /app/vote .
 EXPOSE 8080
-CMD ["/server"]
+CMD ["/vote"]

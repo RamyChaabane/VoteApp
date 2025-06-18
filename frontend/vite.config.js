@@ -6,7 +6,7 @@ export default defineConfig({
     server: {
         proxy: {
             '/vote': {
-                target: 'http://backend:8080',
+                target: 'http://backend:8880',
                 changeOrigin: true
             }
         }

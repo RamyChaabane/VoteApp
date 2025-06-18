@@ -18,6 +18,6 @@ func main() {
 	// Routing
 	http.Handle("/vote", voteHandler)
 
-	log.Println("Backend listening on :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Println("Backend listening on :8880")
+	log.Fatal(http.ListenAndServe(":8880", nil))
 }

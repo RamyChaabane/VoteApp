@@ -6,5 +6,5 @@ RUN go mod tidy && CGO_ENABLED=0 GOOS=linux go build -o vote ./cmd/server
 FROM alpine
 WORKDIR /
 COPY --from=builder /app/vote .
-EXPOSE 8080
+EXPOSE 8880
 CMD ["/vote"]

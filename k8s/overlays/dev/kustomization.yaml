@@ -4,3 +4,8 @@ kind: Kustomization
 # Include base components
 resources:
   - ../../base
+  - backend-hpa.yaml
+  - frontend-hpa.yaml
+
+patches:
+  - path: backend-replicas-patch.yaml

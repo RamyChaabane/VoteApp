@@ -6,13 +6,13 @@ import (
 
 	"github.com/RamyChaabane/VoteApp/backend/internal/handler"
 	"github.com/RamyChaabane/VoteApp/backend/internal/infrastructure/redis"
-	usecase "github.com/RamyChaabane/VoteApp/backend/internal/usecase/vote"
+	svc "github.com/RamyChaabane/VoteApp/backend/internal/usecase/vote"
 )
 
 func main() {
 	// Dependencies
 	repo := redis.NewVoteRepo()
-	service := usecase.NewService(repo)
+	service := svc.NewService(repo)
 	voteHandler := handler.NewVoteHandler(service)
 
 	// Routing

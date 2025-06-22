@@ -1,22 +1,22 @@
-package vote
+package service
 
 import (
 	"context"
+
+	"github.com/RamyChaabane/VoteApp/backend/internal/infrastructure/redis"
 )
 
-type VoteRepository interface {
-	IncrementVote(ctx context.Context, option string) error
-}
+//go:generate mockgen -source=./service.go -destination=../../mocks/service_mock.go -package=mocks
 
 type Service interface {
 	Vote(ctx context.Context, option string) error
 }
 
 type voteService struct {
-	repo VoteRepository
+	repo redis.VoteRepository
 }
 
-func NewService(repo VoteRepository) Service {
+func NewService(repo redis.VoteRepository) Service {
 	return &voteService{repo: repo}
 }
 

@@ -7,6 +7,12 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
+//go:generate mockgen -source=./repo.go -destination=../../mocks/repo_mock.go -package=mocks
+
+type VoteRepository interface {
+	IncrementVote(ctx context.Context, option string) error
+}
+
 type VoteRepo struct {
 	client *redis.Client
 }

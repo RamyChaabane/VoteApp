@@ -34,6 +34,6 @@ jobs:
           context: ./frontend
           push: true
           tags: |
-            rchaabane/vote-frontend:latest
-            rchaabane/vote-frontend:sha-${{ steps.vars.outputs.sha_short }}
-            rchaabane/vote-frontend:ts-${{ github.run_id }}
+            ramydockerid/vote-frontend:latest
+            ramydockerid/vote-frontend:sha-${{ steps.vars.outputs.sha_short }}
+            ramydockerid/vote-frontend:ts-${{ github.run_id }}

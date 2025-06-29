@@ -6,7 +6,7 @@ on:
       - 'backend/**'
       - 'frontend/**'
       - 'k8s/**'
-      - '.github/workflows/ci.yaml'
+      - '.github/**'
 
   push:
     branches: [ main ]
@@ -42,7 +42,7 @@ jobs:
       - name: Validate kustomization overlays
         run: |
           kustomize build k8s/overlays/dev | kubeconform -strict -summary
-  
+
 
   # -------------------------------------
   test:
@@ -116,7 +116,7 @@ jobs:
             ramydockerid/vote-backend:latest
             ramydockerid/vote-backend:sha-${{ steps.vars.outputs.sha_short }}
             ramydockerid/vote-backend:ts-${{ github.run_id }}
-    
+
 
   build-frontend:
     name: Build & Push Frontend Image
@@ -148,3 +148,70 @@ jobs:
             ramydockerid/vote-frontend:latest
             ramydockerid/vote-frontend:sha-${{ steps.vars.outputs.sha_short }}
             ramydockerid/vote-frontend:ts-${{ github.run_id }}
+
+
+  # --------------------------------------
+  e2e:
+    name: e2e test
+    runs-on: ubuntu-latest
+    needs:
+     - build-backend
+     - build-frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Kind cluster
+        uses: helm/kind-action@v1.8.0
+        with:
+          cluster_name: vote-ci
+          version: v0.22.0
+          node_image: kindest/node:v1.30.0
+          wait: 60s
+
+      - name: Install kubectl
+        run: |
+          curl -LO https://dl.k8s.io/release/v1.30.0/bin/linux/amd64/kubectl
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+
+      - name: Install kustomize
+        run: |
+          curl -s https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh | bash
+          chmod +x kustomize
+          sudo mv kustomize /usr/local/bin/
+
+      - name: Deploy to Kind using kustomize
+        run: |
+          kubectl create namespace vote
+          kubectl config set-context --current --namespace=vote
+          kustomize build k8s/overlays/dev | kubectl apply -f -
+
+      - name: Wait for rollout
+        run: |
+          kubectl config set-context --current --namespace=vote
+          kubectl rollout status deployment/frontend --timeout=60s
+          kubectl rollout status deployment/backend --timeout=60s
+
+      - name: Port-forward frontend and test with curl
+        run: |
+          kubectl config set-context --current --namespace=vote
+          kubectl port-forward svc/frontend 8881 &
+          sleep 5
+          echo "✅ Test 1: Valid vote - Cats"
+          curl -s -o /dev/null -w "%{http_code}" -X POST "http://localhost:8881/vote?vote=Cats" | grep -q 200 || exit 1
+      
+          echo "✅ Test 2: Valid vote - Dogs"
+          curl -s -o /dev/null -w "%{http_code}" -X POST "http://localhost:8881/vote?vote=Dogs" | grep -q 200 || exit 1
+      
+          echo "❌ Test 3: Invalid vote - Cat (typo)"
+          curl -s -o /dev/null -w "%{http_code}" -X POST "http://localhost:8881/vote?vote=Cat" | grep -q 400 || exit 1
+      
+          echo "❌ Test 4: Invalid vote - Unicorn"
+          curl -s -o /dev/null -w "%{http_code}" -X POST "http://localhost:8881/vote?vote=Unicorn" | grep -q 400 || exit 1
+      
+          echo "❌ Test 5: No vote param"
+          curl -s -o /dev/null -w "%{http_code}" -X POST "http://localhost:8881/vote" | grep -q 400 || exit 1
+      
+          echo "🎉 All E2E tests passed!"

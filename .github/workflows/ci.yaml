@@ -1,0 +1,150 @@
+name: CI pipeline
+
+on:
+  pull_request:
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'k8s/**'
+      - '.github/workflows/ci.yaml'
+
+  push:
+    branches: [ main ]
+
+jobs:
+  # -------------------------------------
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install kubeconform
+        run: |
+          curl -sSL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar -xz -C /usr/local/bin kubeconform
+          chmod +x /usr/local/bin/kubeconform
+
+      - name: Install yamllint
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y yamllint
+
+      - name: Install Kustomize
+        run: |
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          sudo mv kustomize /usr/local/bin/
+
+      - name: Lint YAML files
+        run: |
+          yamllint k8s/
+
+      - name: Validate kustomization overlays
+        run: |
+          kustomize build k8s/overlays/dev | kubeconform -strict -summary
+  
+
+  # -------------------------------------
+  test:
+    name: Unit Test Backend
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.2'
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          go mod download
+
+      - name: Run unit tests
+        run: |
+          cd backend
+          go test -v ./... -race -coverprofile=coverage.out -covermode=atomic
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/coverage.out
+
+  # -------------------------------------
+  build-backend:
+    name: Build & Push Backend Image
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract Git commit short SHA
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Build and Push Backend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ramydockerid/vote-backend:latest
+            ramydockerid/vote-backend:sha-${{ steps.vars.outputs.sha_short }}
+            ramydockerid/vote-backend:ts-${{ github.run_id }}
+    
+
+  build-frontend:
+    name: Build & Push Frontend Image
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract Git commit short SHA
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Build and Push Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ramydockerid/vote-frontend:latest
+            ramydockerid/vote-frontend:sha-${{ steps.vars.outputs.sha_short }}
+            ramydockerid/vote-frontend:ts-${{ github.run_id }}

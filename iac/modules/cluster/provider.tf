@@ -1,12 +1,4 @@
 terraform {
-  backend "remote" {
-    organization = "ramy-learning"
-
-    workspaces {
-      name = "vote-app"
-    }
-  }
-
   required_providers {
     scaleway = {
       source  = "scaleway/scaleway"

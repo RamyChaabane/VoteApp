@@ -7,15 +7,12 @@ variable "secret_key" {
 variable "project_id" {
   description = "scw project id"
 }
-
-variable "region" {
-  default = "fr-par"
+variable "default_access_key" {
+  description = "default api access key"
 }
-
-variable "zone" {
-  default = "fr-par-1"
+variable "default_secret_key" {
+  description = "default api secret key"
 }
-
-variable "cluster_name" {
-  default = "vote-app-cluster"
+variable "default_project_id" {
+  description = "default scw project id"
 }

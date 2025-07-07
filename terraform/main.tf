@@ -21,6 +21,6 @@ module "bootstrap" {
 module "argocd" {
   source = "./modules/argocd"
 
-  argocd_server_addr    = module.bootstrap.dns_zone
+  argocd_server_addr    = module.bootstrap.argocd_serer_addr
   argocd_admin_password = module.bootstrap.argocd_admin_password
 }

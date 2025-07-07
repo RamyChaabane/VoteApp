@@ -3,7 +3,7 @@ name: Terraform Provision To Scaleway
 on:
   push:
     paths:
-      - 'iac/**'
+      - 'terraform/**'
       - '.github/workflows/iac.yml'
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: iac
+        working-directory: terraform
 
     steps:
       - name: Checkout code

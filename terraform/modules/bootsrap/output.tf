@@ -1,5 +1,5 @@
 output "dns_zone" {
-  value = scaleway_domain_record.argo_hostname.dns_zone
+  value =  format("argocd.%s", scaleway_domain_record.argo_hostname.dns_zone)
 }
 
 output "argocd_admin_password" {

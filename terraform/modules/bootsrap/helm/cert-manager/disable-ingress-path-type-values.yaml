@@ -1,4 +1,3 @@
-# values.yaml
 config:
   featureGates:
     # Disable the use of Exact PathType in Ingress resources, to work around a bug in ingress-nginx

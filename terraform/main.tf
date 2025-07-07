@@ -17,3 +17,10 @@ module "bootstrap" {
   default_secret_key = var.default_secret_key
   default_project_id = var.default_project_id
 }
+
+module "argocd" {
+  source = "./modules/argocd"
+
+  argocd_server_addr    = module.bootstrap.dns_zone
+  argocd_admin_password = module.bootstrap.argocd_admin_password
+}

@@ -89,3 +89,12 @@ resource "kubernetes_manifest" "cluster_issuer" {
   manifest = yamldecode(file("${path.module}/manifests/cert-manager/cluster-issuer.yaml"))
   depends_on = [helm_release.cert_manager]
 }
+
+data "kubernetes_secret" "argocd_admin_password" {
+  metadata {
+    name = "argocd-initial-admin-secret"
+    namespace = "argocd"
+  }
+
+  depends_on = [helm_release.argocd]
+}

@@ -1,14 +1,19 @@
----
-# k8s/base/ingress.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: app-ingress
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - voteapp.rch.domain-buy-5.com
+      secretName: voteapp-tls
   rules:
-    - http:
+    - host: voteapp.rch.domain-buy-5.com
+      http:
         paths:
           - path: /
             pathType: Prefix

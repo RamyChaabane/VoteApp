@@ -4,7 +4,13 @@ metadata:
   name: app-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
 spec:
+  tls:
+    - hosts:
+        - voteapp.rch.domain-buy-5.com
+      secretName: voteapp-tls
   ingressClassName: nginx
   rules:
     - host: voteapp.rch.domain-buy-5.com

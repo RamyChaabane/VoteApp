@@ -5,7 +5,6 @@ on:
     paths:
       - 'backend/**'
       - 'frontend/**'
-      - 'k8s/**'
       - '.github/workflows/ci.yaml'
 
   push:

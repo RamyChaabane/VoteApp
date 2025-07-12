@@ -4,6 +4,10 @@ kind: Ingress
 metadata:
   name: app-ingress
 spec:
+  tls:
+    - hosts:
+        - voteapp.dev.rch.domain-buy-5.com
+      secretName: voteapp-dev-tls
   rules:
     - host: voteapp.dev.rch.domain-buy-5.com
       http:

@@ -1,27 +1,27 @@
 resource "argocd_application" "vote_app" {
   metadata {
-    name      = "vote-app"
-    namespace = "argocd"
+    name      = var.name
+    namespace = var.argo_namespace
   }
 
   spec {
-    project = "default"
+    project = var.project
 
     source {
-      repo_url        = "https://github.com/RamyChaabane/VoteApp"
-      path            = "k8s/overlays/dev"
-      target_revision = "main"
+      repo_url        = var.repo_url
+      target_revision = var.revision
+      path            = var.path
     }
 
     destination {
-      server    = "https://kubernetes.default.svc"
-      namespace = "default"
+      server    = var.destination_server
+      namespace = var.destination_namespace
     }
 
     sync_policy {
       automated {
-        prune       = true
-        self_heal   = true
+        prune     = true
+        self_heal = true
       }
 
       sync_options = [

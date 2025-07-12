@@ -60,6 +60,11 @@ resource "helm_release" "argocd" {
 
   create_namespace = true
 
+  set {
+    name  = "configs.cm.kustomize.buildOptions"
+    value = "--enable-helm"
+  }
+
   wait = true
 }
 

@@ -47,13 +47,3 @@ module "vote-app-prd" {
   argocd_server_addr    = module.bootstrap.argocd_server_addr
   argocd_admin_password = module.bootstrap.argocd_admin_password
 }
-
-module "monitoring" {
-  source = "./modules/argocd"
-
-  destination_namespace = "monitoring"
-  name                  = "kube-prometheus-stack"
-  path                  = "monitoring"
-  argocd_server_addr    = module.bootstrap.argocd_server_addr
-  argocd_admin_password = module.bootstrap.argocd_admin_password
-}

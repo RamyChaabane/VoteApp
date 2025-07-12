@@ -13,15 +13,15 @@ terraform {
 
 provider "helm" {
   kubernetes {
-    host  = var.kube_host
-    token = var.kube_token
+    host                   = var.kube_host
+    token                  = var.kube_token
     cluster_ca_certificate = var.base64_cluster_ca_certificate
   }
 }
 
 provider "kubernetes" {
-  host  = var.kube_host
-  token = var.kube_token
+  host                   = var.kube_host
+  token                  = var.kube_token
   cluster_ca_certificate = var.base64_cluster_ca_certificate
 }
 

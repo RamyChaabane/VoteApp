@@ -64,7 +64,7 @@ resource "helm_release" "argocd" {
 }
 
 resource "kubernetes_manifest" "argocd_ingress" {
-  manifest = yamldecode(file("${path.module}/manifests/argocd/ingress-argocd.yaml"))
+  manifest   = yamldecode(file("${path.module}/manifests/argocd/ingress-argocd.yaml"))
   depends_on = [helm_release.argocd]
 }
 
@@ -86,13 +86,13 @@ resource "scaleway_domain_record" "argo_hostname" {
 }
 
 resource "kubernetes_manifest" "cluster_issuer" {
-  manifest = yamldecode(file("${path.module}/manifests/cert-manager/cluster-issuer.yaml"))
+  manifest   = yamldecode(file("${path.module}/manifests/cert-manager/cluster-issuer.yaml"))
   depends_on = [helm_release.cert_manager]
 }
 
 data "kubernetes_secret" "argocd_admin_password" {
   metadata {
-    name = "argocd-initial-admin-secret"
+    name      = "argocd-initial-admin-secret"
     namespace = "argocd"
   }
 

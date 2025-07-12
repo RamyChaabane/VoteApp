@@ -12,3 +12,4 @@ namespace: vote-dev
 
 patches:
   - path: backend-replicas-patch.yaml
+  - path: ingress-patch.yaml

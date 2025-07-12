@@ -9,7 +9,7 @@ spec:
         - voteapp.stg.rch.domain-buy-5.com
       secretName: voteapp-stg-tls
   rules:
-    - host: voteapp.stg.prd.rch.domain-buy-5.com
+    - host: voteapp.stg.rch.domain-buy-5.com
       http:
         paths:
           - path: /

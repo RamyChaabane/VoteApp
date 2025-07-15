@@ -186,6 +186,7 @@ jobs:
 
       - name: Deploy to Kind using kustomize
         run: |
+          kubectl create ns vote-dev
           kustomize build k8s/overlays/dev | kubectl apply -f -
 
       - name: Wait for rollout

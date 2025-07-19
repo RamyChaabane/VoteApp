@@ -36,12 +36,16 @@ jobs:
           retention-days: 1
 
   # -------------------------------------
-  build-backend:
+  build:
     name: Build Backend Image
     runs-on: ubuntu-latest
     needs: test
     outputs:
-      sha_short: ${{ steps.vars.outputs.sha_short }}
+      version_tag: ${{ steps.set_version.outputs.version_tag }}
+    strategy:
+      matrix:
+        service: [backend, frontend]
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -49,69 +53,42 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Extract Git commit short SHA
-        id: vars
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Set date tag
+        id: set_date
+        run: echo "date_tag=$(date -u +'%Y.%m.%d')" >> $GITHUB_OUTPUT
 
-      - name: Build backend image (no push)
+      - name: Set version tag
+        id: set_version
+        run: |
+          version_tag="${{ steps.set_date.outputs.date_tag }}.${{ github.run_number }}"
+          echo "version_tag=$version_tag" >> $GITHUB_OUTPUT
+
+      - name: Build ${{ matrix.service }} image (no push)
         uses: docker/build-push-action@v5
         with:
-          context: ./backend
+          context: ./${{ matrix.service }}
           push: false
           tags: |
-            ramydockerid/vote-backend:latest
-            ramydockerid/vote-backend:sha-${{ steps.vars.outputs.sha_short }}
-            ramydockerid/vote-backend:ts-${{ github.run_id }}
-          outputs: type=docker,dest=backend-image.tar
+            ramydockerid/vote-${{ matrix.service }}:${{ steps.set_version.outputs.version_tag }}
+          outputs: type=docker,dest=${{ matrix.service }}-image.tar
 
       - name: Upload image tar
         uses: actions/upload-artifact@v4
         with:
-          name: backend-image
-          path: backend-image.tar
-          retention-days: 1
-
-  build-frontend:
-    name: Build Frontend Image
-    runs-on: ubuntu-latest
-    needs: test
-    outputs:
-      sha_short: ${{ steps.vars.outputs.sha_short }}
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Extract Git commit short SHA
-        id: vars
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Build frontend image (no push)
-        uses: docker/build-push-action@v5
-        with:
-          context: ./frontend
-          push: false
-          tags: |
-            ramydockerid/vote-frontend:latest
-            ramydockerid/vote-frontend:sha-${{ steps.vars.outputs.sha_short }}
-            ramydockerid/vote-frontend:ts-${{ github.run_id }}
-          outputs: type=docker,dest=frontend-image.tar
-
-      - name: Upload image tar
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-image
-          path: frontend-image.tar
+          name: ${{ matrix.service }}-image
+          path: ${{ matrix.service }}-image.tar
           retention-days: 1
 
   # -------------------------------------
-  push-backend:
+  push:
     name: Push Backend Image
     runs-on: ubuntu-latest
-    needs: build-backend
+    needs: build
+    strategy:
+      matrix:
+        service: [backend, frontend]
     if: github.ref == 'refs/heads/main'
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -119,10 +96,10 @@ jobs:
       - name: Download image tar
         uses: actions/download-artifact@v4
         with:
-          name: backend-image
+          name: ${{ matrix.service }}-image
 
       - name: Load Docker image
-        run: docker load --input backend-image.tar
+        run: docker load --input ${{ matrix.service }}-image.tar
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -133,40 +110,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Push backend image
+      - name: Push ${{ matrix.service }} image
         run: |
-          docker push ramydockerid/vote-backend:latest
-          docker push ramydockerid/vote-backend:sha-${{ needs.build-backend.outputs.sha_short }}
-          docker push ramydockerid/vote-backend:ts-${{ github.run_id }}
-
-  push-frontend:
-    name: Push Frontend Image
-    runs-on: ubuntu-latest
-    needs: build-frontend
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Download image tar
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-image
-
-      - name: Load Docker image
-        run: docker load --input frontend-image.tar
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to DockerHub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Push frontend image
-        run: |
-          docker push ramydockerid/vote-frontend:latest
-          docker push ramydockerid/vote-frontend:sha-${{ needs.build-frontend.outputs.sha_short }}
-          docker push ramydockerid/vote-frontend:ts-${{ github.run_id }}
+          docker push ramydockerid/vote-${{ matrix.service }}:${{ steps.set_version.outputs.version_tag }}

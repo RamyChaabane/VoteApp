@@ -112,4 +112,6 @@ jobs:
 
       - name: Push ${{ matrix.service }} image
         run: |
-          docker push ramydockerid/vote-${{ matrix.service }}:${{ steps.set_version.outputs.version_tag }}
+          # Recreate the same tag from build job output
+          version_tag="${{ needs.build.outputs.version_tag }}"
+          docker push ramydockerid/vote-${{ matrix.service }}:$version_tag

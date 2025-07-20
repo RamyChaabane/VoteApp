@@ -12,7 +12,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Port-forward frontend and test with curl
+      - name: run e2e test with curl
         run: |
           echo "✅ Test 1: Valid vote - Cats"
           curl -s -o /dev/null -w "%{http_code}" -X POST "https://voteapp.dev.rch.domain-buy-5.com/vote?vote=Cats" | grep -q 200 || exit 1

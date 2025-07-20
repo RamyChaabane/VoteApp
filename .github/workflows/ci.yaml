@@ -60,7 +60,7 @@ jobs:
       - name: Set version tag
         id: set_version
         run: |
-          version_tag="${{ steps.set_date.outputs.date_tag }}.${{ github.run_number }}"
+          version_tag="${{ steps.set_date.outputs.date_tag }}.${{ github.run_id }}"
           echo "version_tag=$version_tag" >> $GITHUB_OUTPUT
 
       - name: Build ${{ matrix.service }} image (no push)
@@ -127,7 +127,7 @@ jobs:
     steps:
       - name: Trigger Renovate on argocd-voteapp repository
         run: |
-          curl -X POST \
+          curl -v -X POST \
             -H "Authorization: token ${{ secrets.TRIGGER_PAT }}" \
             -H "Accept: application/vnd.github.v3+json" \
             https://api.github.com/repos/RamyChaabane/argocd-voteapp/dispatches \

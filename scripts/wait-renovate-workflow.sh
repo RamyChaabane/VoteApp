@@ -1,8 +1,5 @@
 #!/bin/bash
 
-WORKFLOW_NAME="Run Renovate on Dispatch"
-ARTIFACT_NAME="version-${TARGET_VERSION}"
-
 echo "Looking for a workflow run in $REPO with artifact: $ARTIFACT_NAME"
 
 for i in {1..60}; do

@@ -135,9 +135,9 @@ jobs:
             -H "Accept: application/vnd.github.v3+json" \
             https://api.github.com/repos/RamyChaabane/argocd-voteapp/dispatches \
             -d '{
-                  "event_type": "trigger-renovate"
+                  "event_type": "trigger-renovate",
                   "client_payload": {
-                    "version": $version_tag
+                    "version": "$version_tag"
                   }
                }'
 
@@ -166,7 +166,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.TRIGGER_PAT }}
           REPO: "RamyChaabane/argocd-voteapp"
+          WORKFLOW_NAME: "Run Renovate on Dispatch"
           TARGET_VERSION: ${{ needs.build.outputs.version_tag }}
+          ARTIFACT_NAME: "version-${{ needs.build.outputs.version_tag }}"
         run: ./scripts/wait-renovate-workflow.sh
 
   #--------------------------------------

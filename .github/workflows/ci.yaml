@@ -204,6 +204,9 @@ jobs:
       ARGOCD_SERVER: "argocd.rch.domain-buy-5.com"
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Install Argo CD CLI
         run: |
           curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64

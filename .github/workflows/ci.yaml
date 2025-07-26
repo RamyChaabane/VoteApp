@@ -126,12 +126,18 @@ jobs:
     steps:
       - name: Trigger Renovate on argocd-voteapp repository
         run: |
+          version_tag="${{ needs.build.outputs.version_tag }}"
           curl  -X POST \
             -o /dev/null -s -w "%{http_code}\n" \
             -H "Authorization: token ${{ secrets.TRIGGER_PAT }}" \
             -H "Accept: application/vnd.github.v3+json" \
             https://api.github.com/repos/RamyChaabane/argocd-voteapp/dispatches \
-            -d '{"event_type":"trigger-renovate"}'
+            -d '{
+                  "event_type":"trigger-renovate"
+                  "client_payload": {
+                    "version": "$version_tag"
+                  },
+               }'
 
 
 
@@ -145,12 +151,13 @@ jobs:
     steps:
       - name: Wait for Renovate PR to auto-merge into dev
         run: |
+          version_tag="${{ needs.build.outputs.version_tag }}"
           for i in {1..60}; do
               PR_ID=$(gh pr list \
                 --repo https://github.com/"$REPO" \
                 --label "env::dev" \
                 --json number,title \
-                --jq '.[] | select(.title | test("^chore\\(deps\\): update")) | .number')
+                --jq '.[] | select(.title | test("^chore\\(deps\\): .* $version_tag")) | .number')
           
               if [ -n "$PR_ID" ]; then
                 echo "No merged PR yet. Retrying in 5 seconds..."

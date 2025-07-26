@@ -121,7 +121,9 @@ jobs:
   release:
     name: Release and notify Renovate
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: push
+    needs:
+    - push
+    - build
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Renovate on argocd-voteapp repository
@@ -143,7 +145,11 @@ jobs:
 
   #--------------------------------------
   wait-for-renovate-workflow:
-    needs: release
+    name: wait for renovate workflow to finish
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs:
+    - release
+    - build
     runs-on: ubuntu-latest
 
     steps:
@@ -159,24 +165,26 @@ jobs:
       - name: Wait for Renovate to finish
         env:
           GH_TOKEN: ${{ secrets.TRIGGER_PAT }}
-          REPO: ${{ github.repository }}
+          REPO: https://github.com/${{ github.repository }}
           TARGET_VERSION: ${{ needs.build.outputs.version_tag }}
         run: ./scripts/wait-renovate-workflow.sh
 
   #--------------------------------------
   wait-for-dev-merge:
-    needs: wait-for-renovate-workflow
+    needs:
+    - wait-for-renovate-workflow
+    - build
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.TRIGGER_PAT }}
-      REPO: ${{ github.repository }}
+      REPO: https://github.com/${{ github.repository }}
     steps:
       - name: Wait for Renovate PR to auto-merge into dev
         run: |
           version_tag="${{ needs.build.outputs.version_tag }}"
           for i in {1..60}; do
               PR_ID=$(gh pr list \
-                --repo https://github.com/"$REPO" \
+                --repo $REPO \
                 --label "env::dev" \
                 --json number,title \
                 --jq '.[] | select(.title | test("^chore\\(deps\\): .* $version_tag")) | .number')

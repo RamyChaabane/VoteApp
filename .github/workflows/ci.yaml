@@ -44,7 +44,7 @@ jobs:
       version_tag: ${{ steps.set_version.outputs.version_tag }}
     strategy:
       matrix:
-        service: [backend, frontend]
+        service: [ backend, frontend ]
 
     steps:
       - name: Checkout repo
@@ -86,7 +86,7 @@ jobs:
     needs: build
     strategy:
       matrix:
-        service: [backend, frontend]
+        service: [ backend, frontend ]
     if: github.ref == 'refs/heads/main'
 
     steps:
@@ -133,13 +133,35 @@ jobs:
             -H "Accept: application/vnd.github.v3+json" \
             https://api.github.com/repos/RamyChaabane/argocd-voteapp/dispatches \
             -d '{
-                  "event_type":"trigger-renovate"
+                  "event_type": "trigger-renovate"
                   "client_payload": {
-                    "version": "$version_tag"
-                  },
+                    "version": $version_tag
+                  }
                }'
 
 
+
+  #--------------------------------------
+  wait-for-renovate-workflow:
+    needs: release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+          gh --version || brew install gh
+
+      - name: Wait for Renovate to finish
+        env:
+          GH_TOKEN: ${{ secrets.TRIGGER_PAT }}
+          REPO: ${{ github.repository }}
+          TARGET_VERSION: ${{ needs.build.outputs.version_tag }}
+        run: ./scripts/wait-renovate-workflow.sh
 
   #--------------------------------------
   wait-for-dev-merge:

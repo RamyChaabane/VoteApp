@@ -196,10 +196,28 @@ jobs:
         run: ./scripts/wait-renovate-merge-pr.sh
 
   #--------------------------------------
+  wait-for-app-sync:
+    needs: wait-for-PR-to-be-merged
+    runs-on: ubuntu-latest
+    env:
+      ARGOCD_TOKEN: ${{ secrets.ARGOCD_TOKEN }}
+      ARGOCD_SERVER: "argocd.rch.domain-buy-5.com"
+
+    steps:
+      - name: Install Argo CD CLI
+        run: |
+          curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          chmod +x argocd
+          sudo mv argocd /usr/local/bin/
+
+      - name: Wait for Argo CD sync of vote-app-dev
+        run: ./scripts/wait-app-sync.sh
+
+  #--------------------------------------
   run-e2e:
     name: e2e test
     runs-on: ubuntu-latest
-    needs: wait-for-PR-to-be-merged
+    needs: wait-for-app-sync
 
     steps:
       - name: Checkout

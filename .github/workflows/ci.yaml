@@ -155,8 +155,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y jq
           gh --version || brew install gh
-          pwd
-          ls -la
 
       - name: Wait for Renovate to finish
         env:
